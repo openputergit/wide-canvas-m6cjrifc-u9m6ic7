@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Collection App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f0f9ff;
+        }
+        .input-field {
+            @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Data Collection Form</h1>
+        
+        <form id="dataForm" class="space-y-4 bg-white p-6 rounded-lg shadow-md">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Angle (in degrees)</label>
+                <input type="number" name="angle" class="input-field" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Shape</label>
+                <input type="text" name="shape" class="input-field" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Column Number</label>
+                <input type="number" name="column" class="input-field" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Rebound Number</label>
+                <input type="number" name="rebound" class="input-field" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Carbonation</label>
+                <input type="number" name="carbonation" class="input-field" required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Moisture (%)</label>
+                <input type="number" name="moisture" step="0.01" class="input-field" required>
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200">
+                Add Record
+            </button>
+        </form>
+
+        <div class="mt-6">
+            <button id="saveCSV" class="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200">
+                Save to CSV
+            </button>
+        </div>
+
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Latest Record</h2>
+            <div id="latestRecord" class="text-gray-600">
+                No records yet
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let records = [];
+
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const record = {
+                angle: this.angle.value,
+                shape: this.shape.value,
+                column: this.column.value,
+                rebound: this.rebound.value,
+                carbonation: this.carbonation.value,
+                moisture: this.moisture.value
+            };
+            
+            records.push(record);
+            updateLatestRecord(record);
+            this.reset();
+        });
+
+        function updateLatestRecord(record) {
+            const latestRecordDiv = document.getElementById('latestRecord');
+            latestRecordDiv.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <p><strong>Angle:</strong> ${record.angle}°</p>
+                    <p><strong>Shape:</strong> ${record.shape}</p>
+                    <p><strong>Column:</strong> ${record.column}</p>
+                    <p><strong>Rebound:</strong> ${record.rebound}</p>
+                    <p><strong>Carbonation:</strong> ${record.carbonation}</p>
+                    <p><strong>Moisture:</strong> ${record.moisture}%</p>
+                </div>
+            `;
+        }
+
+        document.getElementById('saveCSV').addEventListener('click', function() {
+            if (records.length === 0) {
+                alert('No records to save!');
+                return;
+            }
+            
+            const headers = ['angle_in_degree', 'shape', 'column_number', 'rebound_number', 'carbonation', 'moisture_in_percent'];
+            let csv = headers.join(',') + '\n';
+            
+            records.forEach(record => {
+                const row = [
+                    record.angle,
+                    record.shape,
+                    record.column,
+                    record.rebound,
+                    record.carbonation,
+                    record.moisture
+                ].join(',');
+                csv += row + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'data_records.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
